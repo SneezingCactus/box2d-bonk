@@ -37,10 +37,42 @@ class b2BlockAllocator;
 class b2StackAllocator;
 class b2ContactListener;
 
+// bonk.io change: modified b2MixFriction and b2MixRestitution
+
 /// Friction mixing law. The idea is to allow either fixture to drive the friction to zero.
 /// For example, anything slides on ice.
 inline float b2MixFriction(float friction1, float friction2)
 {
+	
+
+	if (friction1 == 0.001337f)
+	{
+		if (friction2 < 0)
+		{
+			return b2Abs(friction2 / 2);
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	else if (friction2 == 0.001337f)
+	{
+		if (friction1 < 0)
+		{
+			return b2Abs(friction1 / 2);
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	else
+	{
+		friction1 = b2Abs(friction1);
+		friction2 = b2Abs(friction2);
+	}
+
 	return b2Sqrt(friction1 * friction2);
 }
 
@@ -48,7 +80,11 @@ inline float b2MixFriction(float friction1, float friction2)
 /// For example, a superball bounces on anything.
 inline float b2MixRestitution(float restitution1, float restitution2)
 {
-	return restitution1 > restitution2 ? restitution1 : restitution2;
+	if (restitution1 < 0 || restitution2 < 0) {
+    return b2Max(0.0f, restitution2 + restitution1);
+  } else {
+    return restitution1 > restitution2 ? restitution1 : restitution2;
+  }
 }
 
 /// Restitution mixing law. This picks the lowest value.
